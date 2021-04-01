@@ -36,23 +36,26 @@ def apply_config(parse, config):
 def search_parse(parse, score_fn, configs_per=100, trials_per=800, max_configs=10e6):
     assert trials_per >= configs_per
     ns = len(parse)
-    if ns > 9:
-        warnings.warn('parse searching not yet implemented for '
-                      'large characters with ns > 9.')
-        return [], []
     
     nconfigs = math.factorial(ns) * 2**ns
+
+    if ns > 9:
+        if False:
+            warnings.warn('parse searching not yet implemented for '
+                          'large characters with ns > 9.')
+            return [], []
+        else:
+            # if nelt is too large (>10 mil) then limit to the first 1 mil indices
+            # This is hack to allow parsing of large characters (instead of warning above)
+            # (LT)
+            if nconfigs>max_configs:
+                nconfigs = max_configs
 
     # get all ordering & direction configurations (as generators)
     ordering_configs = itertools.permutations(range(ns))
     direction_configs = itertools.product([False,True], repeat=ns)
     configs = itertools.product(ordering_configs, direction_configs)
 
-    # if nelt is too large (>10 mil) then limit to the first 1 mil indices
-    # This is hack to allow parsing of large characters (instead of warning above)
-    # (LT)
-    if nconfigs>max_configs:
-        nconfigs = max_configs
 
     # if we have too many configurations, sample subset
     if nconfigs > trials_per:
