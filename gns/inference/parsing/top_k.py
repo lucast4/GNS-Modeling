@@ -33,29 +33,49 @@ def apply_config(parse, config):
     parse_ = [parse_[i].flip(dims=[0]) if direction[i] else parse_[i] for i in range(ns)]
     return parse_
 
-def search_parse(parse, score_fn, configs_per=100, trials_per=800, max_configs=10e6):
+def search_parse(parse, score_fn, configs_per=100, trials_per=800, max_configs=1e6):
     assert trials_per >= configs_per
     ns = len(parse)
     
-    nconfigs = math.factorial(ns) * 2**ns
 
-    if ns > 9:
-        if False:
-            warnings.warn('parse searching not yet implemented for '
-                          'large characters with ns > 9.')
-            return [], []
-        else:
-            # if nelt is too large (>10 mil) then limit to the first 1 mil indices
-            # This is hack to allow parsing of large characters (instead of warning above)
-            # (LT)
-            if nconfigs>max_configs:
-                nconfigs = max_configs
+    # if ns > 9:
+    #     if False:
+    #         warnings.warn('parse searching not yet implemented for '
+    #                       'large characters with ns > 9.')
+    #         return [], []
+    if ns > 26:
+        warnings.warn('parse searching not yet implemented for '
+                      'large characters with ns > 26.')
+        return [], []        
+    elif ns >=12:
+        # then just take flips
+        ordering_configs = [range(ns)]
+        direction_configs = itertools.product([False, True], repeat=ns)
+        configs = itertools.product(ordering_configs, direction_configs)
 
-    # get all ordering & direction configurations (as generators)
-    ordering_configs = itertools.permutations(range(ns))
-    direction_configs = itertools.product([False,True], repeat=ns)
-    configs = itertools.product(ordering_configs, direction_configs)
+        nconfigs = 2**ns
 
+    elif ns >= 9:
+        # then just get reorderings, but not flippings.
+        # get all ordering & direction configurations (as generators)
+        ordering_configs = itertools.permutations(range(ns))
+        direction_configs = itertools.product([False], repeat=ns)
+        configs = itertools.product(ordering_configs, direction_configs)
+
+        nconfigs = math.factorial(ns)
+    else:
+        # get all ordering & direction configurations (as generators)
+        ordering_configs = itertools.permutations(range(ns))
+        direction_configs = itertools.product([False,True], repeat=ns)
+        configs = itertools.product(ordering_configs, direction_configs)
+
+        nconfigs = math.factorial(ns) * 2**ns
+
+    # if nelt is too large (>10 mil) then limit to the first 1 mil indices
+    # This is hack to allow parsing of large characters (instead of warning above)
+    # (LT)
+    if nconfigs>max_configs:
+        nconfigs = max_configs
 
     # if we have too many configurations, sample subset
     if nconfigs > trials_per:

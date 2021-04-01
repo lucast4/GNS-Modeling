@@ -21,9 +21,10 @@ def sample_from_generator(gen, nelt, nsamp, replace=False):
         idx = sample_idx_noreplace(nelt, nsamp)
     idx = set(idx)
     samples = []
+    MAX = max(idx)
     for i, elt in enumerate(gen):
         if i in idx:
             samples.append(elt)
-        if i>max(idx):
+        if i>MAX:
             break
     return samples
