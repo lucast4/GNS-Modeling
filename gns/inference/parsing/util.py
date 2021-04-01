@@ -24,4 +24,6 @@ def sample_from_generator(gen, nelt, nsamp, replace=False):
     for i, elt in enumerate(gen):
         if i in idx:
             samples.append(elt)
+        if i>max(idx):
+            break
     return samples

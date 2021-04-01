@@ -33,7 +33,7 @@ def apply_config(parse, config):
     parse_ = [parse_[i].flip(dims=[0]) if direction[i] else parse_[i] for i in range(ns)]
     return parse_
 
-def search_parse(parse, score_fn, configs_per=100, trials_per=800):
+def search_parse(parse, score_fn, configs_per=100, trials_per=800, max_configs=10e6):
     assert trials_per >= configs_per
     ns = len(parse)
     if ns > 9:
@@ -47,6 +47,12 @@ def search_parse(parse, score_fn, configs_per=100, trials_per=800):
     ordering_configs = itertools.permutations(range(ns))
     direction_configs = itertools.product([False,True], repeat=ns)
     configs = itertools.product(ordering_configs, direction_configs)
+
+    # if nelt is too large (>10 mil) then limit to the first 1 mil indices
+    # This is hack to allow parsing of large characters (instead of warning above)
+    # (LT)
+    if nconfigs>max_configs:
+        nconfigs = max_configs
 
     # if we have too many configurations, sample subset
     if nconfigs > trials_per:
